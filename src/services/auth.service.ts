@@ -46,6 +46,7 @@ export const registerUser = async (
   const emailVerificationToken = jwtUtils.signEmailVerificationToken({
     sub: String(created.id),
     email: created.email,
+    type: 'email_verification',
   });
 
   await sendEmailVerification(created.email, emailVerificationToken);
@@ -141,6 +142,7 @@ export const requestPasswordReset = async (email: string) => {
   const resetToken = jwtUtils.signPasswordResetToken({
     sub: String(user.id),
     email: user.email,
+    type: 'password_reset'
   });
 
   await db
