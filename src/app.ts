@@ -2,22 +2,34 @@ import express from 'express';
 import { logger } from '#config/logger.js';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import router from '#routes/auth.routes.js';
+import authRouter from '#routes/auth.routes.js';
+import oauthRouter from '#routes/oauth.routes.js';
+import { jwks } from '#utils/jwt.js';
 import { ApiError } from '#utils/apiError.js';
 import globalErrorHandler from '#middleware/errorHandler.js';
 import { ApiResponse } from '#utils/apiResponse.js';
+import { ipRateLimiter } from '#middleware/ipRateLimiter.js';
 
 const app = express();
 
-// securityMiddleware for requests
-app.use(helmet());
+const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
+  .split(',')
+  .map(origin => origin.trim());
 
-// To allow json from incoming requests
+app.use(helmet());
+app.use(
+  cors({
+    origin: corsOrigins,
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-// To log requests and send their message into the logger
 app.use(
   morgan('combined', {
     stream: {
@@ -28,36 +40,23 @@ app.use(
   })
 );
 
-// To parse cookies from request
-app.use(cookieParser());
-
-// app.use(securityMiddleware);
-
-app.get('/', async (req, res) => {
-  try {
-    res.json(new ApiResponse(200, 'Hello from server'));
-  } catch (error) {
-    res.json(new ApiError(500, error as string));
-  }
+app.get('/', (_req, res) => {
+  res.json(new ApiResponse(200, 'Atlas Auth API running'));
 });
 
-app.get('/api', (req, res) =>
-  res.status(200).json({
-    message: 'Acquisition API running!',
-  })
-);
-
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.status(200).send('Ok');
 });
 
-app.use('/api/v1/auth', router);
+app.get('/.well-known/jwks.json', (_req, res) => res.json(jwks));
 
-app.use((req, res, next) => {
+app.use('/api/v1/auth', ipRateLimiter, authRouter);
+app.use('/oauth', ipRateLimiter, oauthRouter);
+
+app.use((req, _res, next) => {
   next(new ApiError(404, `Cannot find ${req.originalUrl}`));
 });
 
-// Global Error Handler LAST
 app.use(globalErrorHandler);
 
 export default app;

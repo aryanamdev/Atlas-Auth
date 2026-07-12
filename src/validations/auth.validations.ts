@@ -16,3 +16,17 @@ export const loginSchema = registerSchema.pick({
   email: true,
   password: true,
 });
+
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .email('email must be a valid email')
+    .max(255)
+    .toLowerCase()
+    .trim(),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(10),
+  password: z.string().min(8).max(128),
+});

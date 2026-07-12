@@ -14,3 +14,17 @@ export const sendEmailVerification = async (
     `Email verification link for ${email}: ${verificationUrl} (send this via your email provider in production)`
   );
 };
+
+export const sendPasswordReset = async (
+  email: string,
+  token: string
+): Promise<void> => {
+  const baseUrl = config.appBaseUrl;
+  const resetUrl = `${baseUrl}/api/v1/auth/reset-password?token=${encodeURIComponent(
+    token
+  )}`;
+
+  logger.info(
+    `Password reset link for ${email}: ${resetUrl} (send this via your email provider in production)`
+  );
+};

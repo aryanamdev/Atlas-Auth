@@ -20,7 +20,7 @@ try {
   throw err; // Stop app from starting
 }
 
-let db;
+let db: any;
 try {
   db = drizzle(sql);
 } catch (err) {

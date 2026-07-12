@@ -4,6 +4,7 @@
   "_version": "24.0.0",
   "compilerOptions": {
     "baseUrl": ".",
+    "types": ["node"],
     "paths": {
       "#config/*": ["src/config/*"],
       "#routes/*": ["src/routes/*"],
@@ -27,7 +28,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "moduleResolution": "node16",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "rootDir": "./src"
     
   },
     "include": ["src/**/*.ts"],
