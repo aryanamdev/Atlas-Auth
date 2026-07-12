@@ -20,13 +20,14 @@ import {
   requestPasswordReset,
   resetPassword,
 } from '#services/auth.service.js';
-import {
-  createRefreshToken,
-  rotateRefreshToken,
-  revokeRefreshTokenFamily,
-  validateRefreshTokenRow,
-} from '#services/token.service.ts';
+// import {
+//   createRefreshToken,
+//   rotateRefreshToken,
+//   revokeRefreshTokenFamily,
+//   validateRefreshTokenRow,
+// } from '#services/token.service.ts';
 import { jwtUtils } from '#utils/jwt.js';
+import { createRefreshToken, revokeRefreshTokenFamily, rotateRefreshToken, validateRefreshTokenRow } from '#services/token.service.js';
 
 const refreshCookieOptions = {
   path: '/api/v1/auth/refresh-token',
@@ -204,7 +205,7 @@ export const logout = async (
     const refreshToken = cookies.get(req, 'refreshToken');
     if (refreshToken) {
       const payload = jwtUtils.verifyRefreshToken(refreshToken);
-      await revokeRefreshTokenFamily(payload.fam, 'logout');
+      await revokeRefreshTokenFamily(payload.fam);
     }
 
     cookies.clear(res, 'refreshToken', refreshCookieOptions);

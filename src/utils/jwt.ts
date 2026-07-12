@@ -1,5 +1,5 @@
 import { createPublicKey, createPrivateKey, generateKeyPairSync } from 'crypto';
-import jwt, { JwtPayload as JwtPayloadBase, SignOptions } from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { logger } from '#config/logger.js';
 import { ApiError } from '#utils/apiError.js';
 
@@ -84,6 +84,19 @@ export type PasswordResetPayload = {
   type: 'password_reset';
 };
 
+const parseExpiry = (expiry: string): number => {
+  const timeUnit = expiry.slice(-1);
+  const timeValue = parseInt(expiry.slice(0, -1), 10);
+  
+  switch (timeUnit) {
+    case 's': return timeValue; // seconds
+    case 'm': return timeValue * 60; // minutes
+    case 'h': return timeValue * 3600; // hours
+    case 'd': return timeValue * 86400; // days
+    default: throw new Error('Invalid expiry format');
+  }
+};
+
 const signToken = <T extends object>(
   payload: T,
   expiresIn: string,
@@ -92,7 +105,7 @@ const signToken = <T extends object>(
   try {
     const options: SignOptions = {
       algorithm: 'RS256',
-      expiresIn,
+      expiresIn: parseExpiry(expiresIn),
       issuer,
       audience,
       keyid: keyId,

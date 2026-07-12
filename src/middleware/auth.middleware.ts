@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { db } from '#config/db.js';
 import { users } from '#models/users.model.js';
 import { eq } from 'drizzle-orm';
-import { jwtUtils, type AccessTokenPayload, UserRole } from '#utils/jwt.js';
+import { jwtUtils,UserRole } from '#utils/jwt.js';
 import { ApiError } from '#utils/apiError.js';
 
 export interface AuthenticatedRequest extends Request {

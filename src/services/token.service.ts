@@ -46,7 +46,7 @@ export const rotateRefreshToken = async (
 
   if (!existingToken || existingToken.revoked) {
     if (existingToken?.familyId) {
-      await revokeRefreshTokenFamily(existingToken.familyId, 'reuse-detected');
+      await revokeRefreshTokenFamily(existingToken.familyId);
     }
     throw new ApiError(401, 'Refresh token is invalid or revoked');
   }
@@ -86,7 +86,6 @@ export const rotateRefreshToken = async (
 
 export const revokeRefreshTokenFamily = async (
   familyId: string,
-  reason = 'revoked'
 ): Promise<void> => {
   await db
     .update(refreshTokens)
@@ -107,7 +106,7 @@ export const validateRefreshTokenRow = async (
 
   if (!tokenRow || tokenRow.revoked || tokenRow.expiresAt < new Date()) {
     if (tokenRow?.familyId) {
-      await revokeRefreshTokenFamily(tokenRow.familyId, 'invalid-refresh');
+      await revokeRefreshTokenFamily(tokenRow.familyId);
     }
     throw new ApiError(401, 'Refresh token is invalid or expired');
   }
